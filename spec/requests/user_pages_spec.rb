@@ -55,6 +55,7 @@ describe "UserPages" do
 				it { should have_selector('div.alert.alert-success', text: 'Welcome')}
 				it { should_not have_content('error') }
 				it { should_not have_content('errors') }
+				it { should have_link('Sign out') }
 			end
 		end
 
