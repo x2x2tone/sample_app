@@ -83,6 +83,15 @@ describe "AuthenticationPages" do
 				end
 			end
 
+			describe "when attempting to create a micropost" do
+				before { post microposts_path }
+				specify { response.should redirect_to(signin_path) }
+			end
+			describe "when attempting to delete a micropost" do
+				let(:micropost) { FactoryGirl.create(:micropost, user: user) }
+				before { delete micropost_path(micropost) }
+				specify { response.should redirect_to(signin_path) }
+			end
 		end
 
 		describe "as wrong user" do
