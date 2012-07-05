@@ -69,6 +69,28 @@ describe "AuthenticationPages" do
 					before { visit users_path }
 					it { should have_selector('title', text: 'Sign in') }
 				end
+
+				describe "following user page" do
+					before { visit following_user_path(user) }
+					it { should have_selector('title', text: 'Sign in') }
+				end
+
+				describe "followed user page" do
+					before { visit followers_user_path(user) }
+					it { should have_selector('title', text: 'Sign in') }
+				end
+
+				describe "submit follow/unfollow" do
+					describe "following user page" do
+						before { post relationships_path }
+						specify { response.should redirect_to(signin_path) }
+					end
+
+					describe "followed user page" do
+						before { delete relationship_path(1)  }
+						specify { response.should redirect_to(signin_path) }
+					end
+				end
 			end
 
 			describe "when attempting to visit a protected page" do
@@ -92,6 +114,7 @@ describe "AuthenticationPages" do
 				before { delete micropost_path(micropost) }
 				specify { response.should redirect_to(signin_path) }
 			end
+
 		end
 
 		describe "as wrong user" do

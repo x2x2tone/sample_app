@@ -13,6 +13,14 @@ class User < ActiveRecord::Base
   attr_accessible :email, :name, :password, :password_confirmation
 	has_secure_password
 	has_many :microposts , dependent: :destroy
+	has_many :relationships, foreign_key: "follower_id", dependent: :destroy
+	has_many :followed_users, through: :relationships, source: :followed
+	has_many :reverse_relationships, foreign_key: "followed_id",
+	                                 class_name: "Relationship",
+	                                 dependent: :destroy
+	has_many :followers, through: :reverse_relationships
+	#--- followersの単数形がfollowになるため、followerと関連付く
+	#--- よって、source: :follower　は不要
 
 	VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
 
@@ -29,6 +37,18 @@ class User < ActiveRecord::Base
 		Micropost.where("user_id = ?", id)
 	end
 
+	def following?(other_user)
+		#followed_users.include?(other_user.id)
+		relationships.find_by_followed_id(other_user.id)
+	end
+
+	def follow!(other_user)
+		relationships.create!(followed_id: other_user.id)
+	end
+
+	def unfollow!(other_user)
+		relationships.find_by_followed_id(other_user.id).destroy
+	end
 
 	private
 		def create_remember_token
