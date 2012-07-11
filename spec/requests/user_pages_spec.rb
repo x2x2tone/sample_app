@@ -80,6 +80,55 @@ describe "UserPages" do
 			it { should have_content( user.microposts.count ) }
 		end
 
+		describe "follow/unfollow buttons" do
+			let(:unfollow_user) { FactoryGirl.create(:user) }
+			let(:followed_user) { FactoryGirl.create(:user) }
+			before { sign_in user }
+
+			describe "follow" do
+			  before { visit user_path(unfollow_user) }
+
+				it "user's followed user is increased" do
+					expect do
+						click_button "Follow" 
+					end.to change(user.followed_users, :count).by(1) 
+				end
+
+				it "followed user's follower is increased" do
+					expect do
+						click_button "Follow" 
+					end.to change(unfollow_user.followers, :count).by(1) 
+				end
+				
+				describe "toggling the button" do
+					before { click_button "Follow" }
+					it { should have_selector("input", value: "Unfollow") }
+				end
+			end
+
+			describe "unfollowing a user" do
+				before do
+					user.follow!(followed_user)
+					visit user_path(followed_user)
+				end
+
+				it "user's followed user is decreased" do
+					expect do
+						click_button "Unfollow" 
+					end.to change(user.followed_users, :count).by(-1) 
+				end
+
+				it "followed user's follower is decreased" do
+					expect do
+						click_button "Unfollow" 
+					end.to change(followed_user.followers, :count).by(-1) 
+				end
+				describe "toggling the button" do
+					before { click_button "Unfollow" }
+					it { should have_selector("input", value: "Follow") }
+				end
+			end
+		end
 	end
 
 	describe "edit" do
@@ -195,57 +244,5 @@ describe "UserPages" do
 		end
 	end
 
-	describe "submitting follow/unfollow button" do
-		let(:user) { FactoryGirl.create(:user) }
-		let(:unfollow_user) { FactoryGirl.create(:user) }
-		let(:followed_user) { FactoryGirl.create(:user) }
-		before do
-			sign_in user
-			user.follow!(followed_user)
-		end
-
-		describe "follow" do
-			# before { visit user_path(unfollow_user) }
-			before do
-			  visit user_path(unfollow_user) 
-			end
-
-			it "user's followed user is increased" do
-				expect do
-					click_button "Follow" 
-				end.to change(user.followed_users, :count).by(1) 
-			end
-
-			it "followed user's follower is increased" do
-				expect do
-					click_button "Follow" 
-				end.to change(unfollow_user.followers, :count).by(1) 
-			end
-			describe "Follow button turns Unfollow" do
-				before { click_button "Follow" }
-				it { should have_button("Unfollow") }
-			end
-		end
-
-		describe "unfollow" do
-			before { visit user_path(followed_user) }
-
-			it "user's followed user is decreased" do
-				expect do
-					click_button "Unfollow" 
-				end.to change(user.followed_users, :count).by(-1) 
-			end
-
-			it "followed user's follower is decreased" do
-				expect do
-					click_button "Unfollow" 
-				end.to change(followed_user.followers, :count).by(-1) 
-			end
-			describe "Unfollow button turns Follow" do
-				before { click_button "Unfollow" }
-				it { should have_button("Follow") }
-			end
-		end
-	end
 
 end
