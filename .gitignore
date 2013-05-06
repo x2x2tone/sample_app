@@ -19,6 +19,7 @@ doc/
 *.swp
 *~
 .project
+.rvmrc
 
 # bundle gems
 vendor/bundle
